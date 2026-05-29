@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django authentication</title>
+</head>
+<body>
+    <h1> Todo APP </h1>
+    <hr>
+    <form method="POST" action="">
+        {% csrf_token %}
+        {% if error %}
+        <p>{{error}}</p>
+        {% endif %}
+        <label for="user"> Username
+            <input type="text" name="username" id="user" placeholder="Enter username">
+
+        </label>
+        <label for="pass">
+            <input type="password" name="password" id="pass" placeholder="Enter Password">
+        </label>
+        
+        <button type="submit">Login</button>
+        <p> If new user Register </p>
+        <a href="{% url 'register' %}">create new account</a>
+    </form>
+</body>
+</html>
