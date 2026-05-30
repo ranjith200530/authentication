@@ -1,8 +1,10 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import login,logout,authenticate
 from django.contrib.auth.decorators import login_required
 import re
+
+from . import models
 # Create your views here.
 
 def logoutpage(request):
@@ -90,4 +92,44 @@ def registerpage(req):
 
 
 def home(req):
-    return render(req,"home.html")
+    if req.user.groups.filter(name="Admin").exists():
+        task=models.Todo.objects.all()
+        name="Admin"
+        
+
+    elif req.user.groups.filter(name="Manager").exists():
+        task=models.Todo.objects.all()
+        name="Manager"
+
+    elif req.user.groups.filter(name="users").exists():
+        name="Normal user"
+        task=models.Todo.objects.filter(user=req.user)
+    return render(req,"home.html",{"task":task,"name":name,  "is_admin": req.user.groups.filter(name="Admin").exists(),})
+
+
+
+
+
+
+
+
+def edit(req,id):
+    task = get_object_or_404(models.Todo, id=id)
+    if req.method=="POST":
+        new_title=req.POST.get('title')
+        task.title=new_title
+        task.save()
+        return redirect("home")
+    return render(req,"edit.html",{'task':task})
+
+def delete(req,id):
+    task = get_object_or_404(models.Todo, id=id)
+    task.delete()
+    return redirect("home")
+
+def add(req):
+    if req.method=="POST":
+        title=req.POST.get("title")
+        models.Todo.objects.create(title=title,user=req.user)
+        
+        return redirect("home")

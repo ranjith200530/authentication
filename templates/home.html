@@ -8,30 +8,35 @@
 <body>
 
     <h1> Todo APP</h1>
-    
+    <h1>{{name}}</h1>
+    <hr>
 
-    <form method="POST" action="">
+    <form method="POST" action="{% url 'add_task' %}">
         {% csrf_token %}
 
         <input type="text" name="title" placeholder="Enter task">
 
         <button type="submit">Add Task</button>
     </form>
- <a href="{% url 'logout' %}">Logout</a>
 
 
-    <!-- {% for i in data %}
+
+    {% for i in task %}
+    
     <p>
         {{ i.title }}
 
         <a href="{% url 'edit' i.id %}">
             <button>Edit</button>
         </a>
-
+ {% if is_admin %}
         <a href="{% url 'delete' i.id %}">
             <button>Delete</button>
         </a>
+        {% endif %}
     </p>
-    {% endfor %} -->
+    {% endfor %}
+
+    <a href="{% url 'logout' %}"><button> Logout</button></a>
 </body>
 </html>
