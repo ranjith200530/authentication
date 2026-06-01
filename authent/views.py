@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from django.contrib.auth import login,logout,authenticate
 from django.contrib.auth.decorators import login_required
 import re
@@ -85,6 +85,8 @@ def registerpage(req):
             username=username,
             password=password
         )
+        user_group = Group.objects.get(name="users")
+        user.groups.add(user_group)
         login(req,user)
         return redirect("home")
     return render(req,"registerpage.html")
@@ -92,19 +94,33 @@ def registerpage(req):
 
 
 def home(req):
-    if req.user.groups.filter(name="Admin").exists():
+     if req.method == "POST":
+         user_id = req.POST.get("user_id")
+         group_id = req.POST.get("group_id")
+
+         user = User.objects.get(id=user_id)
+         group = Group.objects.get(id=group_id)
+         
+         user.groups.clear()
+         user.groups.add(group)
+         return redirect("home")
+     if req.user.groups.filter(name="Admin").exists():
+        users=User.objects.all()
         task=models.Todo.objects.all()
         name="Admin"
         
 
-    elif req.user.groups.filter(name="Manager").exists():
+     elif req.user.groups.filter(name="Manager").exists():
         task=models.Todo.objects.all()
+        users=User.objects.all()
         name="Manager"
 
-    elif req.user.groups.filter(name="users").exists():
+     elif req.user.groups.filter(name="users").exists():
         name="Normal user"
+        users = User.objects.filter(id=req.user.id)
         task=models.Todo.objects.filter(user=req.user)
-    return render(req,"home.html",{"task":task,"name":name,  "is_admin": req.user.groups.filter(name="Admin").exists(),})
+     group=Group.objects.all()
+     return render(req,"home.html",{"task":task,"name":name,  "is_admin": req.user.groups.filter(name="Admin").exists(),"users":users,"groups":group})
 
 
 
